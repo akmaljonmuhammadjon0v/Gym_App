@@ -1,14 +1,15 @@
+/// <reference types="vite/client" />
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
-	apiKey: 'AIzaSyDdhjFoPX-Y0tolJyQmHKKdXiD4Hjzpl60',
-	authDomain: 'gym-training-eea21.firebaseapp.com',
-	projectId: 'gym-training-eea21',
-	storageBucket: 'gym-training-eea21.firebasestorage.app',
-	messagingSenderId: '291139213507',
-	appId: '1:291139213507:web:4f415e71f0fcaf3bda6a76',
+	apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+	authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+	projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+	storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+	messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+	appId: import.meta.env.VITE_FIREBASE_APP_ID,
 };
 
 const app = initializeApp(firebaseConfig);

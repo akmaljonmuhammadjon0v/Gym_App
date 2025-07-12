@@ -26,8 +26,9 @@ import {
 	updateDoc,
 } from 'firebase/firestore';
 import { BadgePlus } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { RiAlertLine } from 'react-icons/ri';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { z } from 'zod';
 
@@ -37,7 +38,12 @@ const Dashboard = () => {
 	const [currentTask, setCurrentTask] = useState<ITask | null>(null);
 	const [open, setOpen] = useState(false);
 
+	const navigate = useNavigate();
 	const { user } = useUserState();
+
+	useEffect(() => {
+		!user && navigate('/');
+	}, [user]);
 
 	const { isPending, error, data, refetch } = useQuery({
 		queryKey: ['tasks-data'],
@@ -94,12 +100,14 @@ const Dashboard = () => {
 			addMinutes(date, date.getTimezoneOffset()),
 			'HH:mm:ss'
 		);
+
 		return formattedDate;
 	};
+
 	return (
 		<>
-			<div className='h-screen max-w-6xl mx-auto flex items-center'>
-				<div className='grid grid-cols-2 w-full gap-8 items-center'>
+			<div className='h-screen max-w-6xl mx-auto flex items-center max-md:px-6 max-md:pt-[8vh]'>
+				<div className='grid lg:grid-cols-2 grid-cols-1 w-full gap-8 items-center'>
 					<div className='flex flex-col space-y-3'>
 						<div className='w-full p-4 rounded-md flex justify-between bg-gradient-to-t from-background to-secondary'>
 							<div className='text-2xl font-bold'>Trainings</div>
@@ -134,7 +142,11 @@ const Dashboard = () => {
 											title={currentTask?.title}
 											isEdit
 											onClose={() => setIsEditing(false)}
-											handler={onUpdate}
+											handler={
+												onUpdate as (
+													values: z.infer<typeof taskSchema>
+												) => Promise<void | null>
+											}
 										/>
 									)}
 								</div>
@@ -149,11 +161,9 @@ const Dashboard = () => {
 								<FillLoading />
 							) : (
 								data && (
-									<>
-										<div className='text-3xl font-bold'>
-											{formatDate(data?.weekTotal)}
-										</div>
-									</>
+									<div className='text-3xl font-bold'>
+										{formatDate(data.weekTotal)}
+									</div>
 								)
 							)}
 						</div>
@@ -163,11 +173,9 @@ const Dashboard = () => {
 								<FillLoading />
 							) : (
 								data && (
-									<>
-										<div className='text-3xl font-bold'>
-											{formatDate(data?.monthTotal)}
-										</div>
-									</>
+									<div className='text-3xl font-bold'>
+										{formatDate(data.monthTotal)}
+									</div>
 								)
 							)}
 						</div>
@@ -177,11 +185,9 @@ const Dashboard = () => {
 								<FillLoading />
 							) : (
 								data && (
-									<>
-										<div className='text-3xl font-bold'>
-											{formatDate(data?.weekTotal)}
-										</div>
-									</>
+									<div className='text-3xl font-bold'>
+										{formatDate(data.total)}
+									</div>
 								)
 							)}
 						</div>

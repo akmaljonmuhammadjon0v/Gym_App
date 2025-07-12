@@ -5,6 +5,7 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
+import FillLoading from '../shared/fill-loading';
 import { Button } from '../ui/button';
 import {
 	Form,
@@ -19,34 +20,36 @@ interface Props {
 	title?: string;
 	isEdit?: boolean;
 	onClose?: () => void;
-	handler: (values: z.infer<typeof taskSchema>) => Promise<void>;
+	handler: (values: z.infer<typeof taskSchema>) => Promise<void | null>; // Promise<void | null> tipi bilan mos
 }
 
 const TaskForm = ({ title = '', handler, isEdit, onClose }: Props) => {
-	const form = useForm<z.infer<typeof taskSchema>>({
-		resolver: zodResolver(taskSchema),
-		defaultValues: { title: '' },
-	});
-
-	const [isLoading, setisLoading] = useState(false);
+	const [isLoading, setIsLoading] = useState(false);
 
 	const { user } = useUserState();
 
+	const form = useForm<z.infer<typeof taskSchema>>({
+		resolver: zodResolver(taskSchema),
+		defaultValues: { title },
+	});
+
 	const onSubmit = async (values: z.infer<typeof taskSchema>) => {
 		if (!user) return null;
-		setisLoading(true);
-		const { title } = values;
-		const promise = handler(values).finally(() => setisLoading(false));
 
-		toast.promise(promise, {
-			loading: 'Loading...',
-			success: 'Success!',
-			error: 'Something went wrong',
-		});
+		setIsLoading(true);
+		try {
+			await handler(values);
+			toast.success('Success!');
+		} catch (error) {
+			toast.error('Something went wrong!');
+		} finally {
+			setIsLoading(false);
+		}
 	};
 
 	return (
-		<div>
+		<>
+			{isLoading && <FillLoading />}
 			<Form {...form}>
 				<form onSubmit={form.handleSubmit(onSubmit)} className='space-y-2'>
 					<FormField
@@ -65,7 +68,7 @@ const TaskForm = ({ title = '', handler, isEdit, onClose }: Props) => {
 							</FormItem>
 						)}
 					/>
-					<div className='flex justify-end gap-4'>
+					<div className='flex justify-end gap-2'>
 						{isEdit && (
 							<Button
 								type='button'
@@ -73,7 +76,7 @@ const TaskForm = ({ title = '', handler, isEdit, onClose }: Props) => {
 								variant={'destructive'}
 								onClick={onClose}
 							>
-								cancel
+								Cancel
 							</Button>
 						)}
 						<Button type='submit' disabled={isLoading}>
@@ -82,7 +85,7 @@ const TaskForm = ({ title = '', handler, isEdit, onClose }: Props) => {
 					</div>
 				</form>
 			</Form>
-		</div>
+		</>
 	);
 };
 
